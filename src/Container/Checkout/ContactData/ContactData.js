@@ -1,4 +1,4 @@
-import Axios from '../../../Axios-Order';
+
 import React, { Component } from 'react'
 import Button from '../../../Components/UI/Button/Button'
 import './ContactData.css'
@@ -6,6 +6,7 @@ import Auxilary from '../../../HOC/Auxilary/Auxilary';
 import Spinner from '../../../Components/UI/Spinner/Spinner';
 import Input from '../../../Components/UI/Input/Input';
 import { connect } from 'react-redux';
+
 
 export class ContactData extends Component {
     state = {
@@ -106,44 +107,49 @@ export class ContactData extends Component {
                     ]
                 },
                 value: 'fast',
+                validation: {},
+                valid: true,
+                touched: false
             }
         },
         isLoading: false
-    }
+    };
+
+
 
     orderHandler = (event) => {
         event.preventDefault();
-        console.log(this.props.ingredients);
-        console.log('Loading Happaning..');
-        this.setState({ isLoading: true });
-        const order = {
-            customer: {
-                name: this.state.orderFrom.name.value,
-                email: this.state.orderFrom.email.value,
-                address: {
-                    street: this.state.orderFrom.street.value,
-                    country: this.state.orderFrom.country.value,
-                    postalCode: this.state.orderFrom.postalCode.value,
-                },
-            },
-            deliveryMethod: this.state.orderFrom.deliveryMethod.value,
-            ingredients: this.props.ingredients,
-            price: this.props.price
-        }
+        // console.log(this.props.ingredients);
+        // console.log('Loading Happaning..');
+        // this.setState({ isLoading: true });
+        // const order = {
+        //     customer: {
+        //         name: this.state.orderFrom.name.value,
+        //         email: this.state.orderFrom.email.value,
+        //         address: {
+        //             street: this.state.orderFrom.street.value,
+        //             country: this.state.orderFrom.country.value,
+        //             postalCode: this.state.orderFrom.postalCode.value,
+        //         },
+        //     },
+        //     deliveryMethod: this.state.orderFrom.deliveryMethod.value,
+        //     ingredients: this.props.ingredients,
+        //     price: this.props.price
+        // }
 
         // http post
         // Axios.post('/orders', order)
-        Axios.post('/orders.json', order)
-            .then(res => {
+        // Axios.post('/orders.json', order)
+        //     .then(res => {
 
-                this.props.history.push('/');
-                console.log('Loading closed...');
-                this.setState({ isLoading: false });
-            })
-            .catch(err => {
-                this.setState({ isLoading: false });
-                console.log(err);
-            })
+        //         this.props.history.push('/');
+        //         console.log('Loading closed...');
+        //         this.setState({ isLoading: false });
+        //     })
+        //     .catch(err => {
+        //         this.setState({ isLoading: false });
+        //         console.log(err);
+        //     })
 
     }
 
@@ -177,7 +183,16 @@ export class ContactData extends Component {
             isValid = value.includes('@') && isValid;
         }
 
+        if (!rule) {
+            return isValid;
+        }
+
         return isValid;
+    }
+
+    disabledBtn = () => {
+        const valid = Object.keys(this.state).forEach(obj => obj.touched === false);
+        console.log(valid);
     }
 
     render() {
@@ -211,21 +226,28 @@ export class ContactData extends Component {
                                     shouldValidate={inputElement.config.validation} />
                             ))
                         }
-                        <Button type="submit" btnType='Success' >Order</Button>
+                        <Button type="submit" btnType='Success' disabled={this.disabledBtn} >Order</Button>
                     </form>
+
                 </Auxilary>
             );
         }
 
         return (
             < div className='ContactData' >
-                {contactData}
+                {this.props.ingredients.salad || this.props.ingredients.cheese || this.props.ingredients.meat || this.props.ingredients.becon ? contactData : this.props.history.push('/')}
             </div >
         )
     }
 }
 
 
+const stateToprops = state => {
+    return {
+        ingredients: state.ingredients,
+        price: state.totalPrice
+    }
+}
 
 
-export default connect()(ContactData);
+export default connect(stateToprops)(ContactData);

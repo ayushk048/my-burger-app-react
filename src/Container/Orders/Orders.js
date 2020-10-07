@@ -12,27 +12,27 @@ const Orders = (props) => {
     const [error, setError] = useState(false);
 
 
+
     useEffect(() => {
+
         setIsLoading({
             ...isLoading,
             isLoading: true
         });
-
-        Axios.get('/orders.json')
-            .then(res => {
-                let fetchOrder = [];
-                for (const key in res.data) {
-                    fetchOrder.push({ id: key, ...res.data[key] });
-                }
-                setOrders(fetchOrder);
-                setIsLoading(false);
-                setError(false);
-            })
+        Axios.get('/orders.json').then(res => {
+            let fetchOrder = [];
+            for (const key in res.data) {
+                fetchOrder.push({ id: key, ...res.data[key] });
+            }
+            setOrders(fetchOrder);
+            setIsLoading(false);
+            setError(false);
+        })
             .catch(err => {
                 setIsLoading(false);
                 setError(err);
             })
-    }, [orders, isLoading, error]);
+    }, []);
 
     const closeModalHandler = () => {
         setError({
