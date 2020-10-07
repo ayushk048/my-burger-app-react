@@ -23,6 +23,7 @@ const reducer = (state = initialState, action) => {
 
     switch (action.type) {
         case actionType.ADD_INGREDIENT:
+            console.log(action.ingredientName);
             return {
                 ...state,
                 ingredients: {

@@ -5,6 +5,7 @@ import './ContactData.css'
 import Auxilary from '../../../HOC/Auxilary/Auxilary';
 import Spinner from '../../../Components/UI/Spinner/Spinner';
 import Input from '../../../Components/UI/Input/Input';
+import { connect } from 'react-redux';
 
 export class ContactData extends Component {
     state = {
@@ -20,7 +21,7 @@ export class ContactData extends Component {
                 value: '',
                 validation: {
                     required: true,
-
+                    minLength: 3
                 },
                 valid: false,
                 touched: false
@@ -116,8 +117,6 @@ export class ContactData extends Component {
         console.log('Loading Happaning..');
         this.setState({ isLoading: true });
         const order = {
-            ingredients: this.props.ingredients,
-            price: this.props.price,
             customer: {
                 name: this.state.orderFrom.name.value,
                 email: this.state.orderFrom.email.value,
@@ -127,26 +126,29 @@ export class ContactData extends Component {
                     postalCode: this.state.orderFrom.postalCode.value,
                 },
             },
-            deliveryMethod: this.state.orderFrom.deliveryMethod.value
-
-
+            deliveryMethod: this.state.orderFrom.deliveryMethod.value,
+            ingredients: this.props.ingredients,
+            price: this.props.price
         }
 
         // http post
+        // Axios.post('/orders', order)
         Axios.post('/orders.json', order)
             .then(res => {
+
+                this.props.history.push('/');
                 console.log('Loading closed...');
-                // this.setState({ isLoading: false });
+                this.setState({ isLoading: false });
             })
             .catch(err => {
                 this.setState({ isLoading: false });
                 console.log(err);
             })
 
-        this.props.history.push('/');
     }
 
     inputElementChangeHandler = (event, id) => {
+        console.log(event.target.value);
         let cloneOrderForm = JSON.parse(JSON.stringify(this.state.orderFrom));
         cloneOrderForm[id].value = event.target.value;
         if (cloneOrderForm[id].validation) {
@@ -190,31 +192,30 @@ export class ContactData extends Component {
         let contactData = null;
         if (this.state.isLoading) {
             contactData = <Spinner />
+        } else {
+            contactData = (
+                <Auxilary>
+                    <h4>Enter your details</h4>
+                    <form onSubmit={this.orderHandler}>
+                        {
+                            formElementArr.map(inputElement => (
+                                <Input
+                                    key={inputElement.id}
+                                    label={inputElement.config.attributes.label}
+                                    elementType={inputElement.config.inputtype}
+                                    attributes={inputElement.config.attributes}
+                                    value={inputElement.config.value}
+                                    changed={(event) => this.inputElementChangeHandler(event, inputElement.id)}
+                                    touched={inputElement.config.touched}
+                                    valid={inputElement.config.valid}
+                                    shouldValidate={inputElement.config.validation} />
+                            ))
+                        }
+                        <Button type="submit" btnType='Success' >Order</Button>
+                    </form>
+                </Auxilary>
+            );
         }
-        console.log(formElementArr);
-        contactData = (
-            <Auxilary>
-                <h4>Enter your details</h4>
-                <form onSubmit={this.orderHandler}>
-                    {
-                        formElementArr.map(inputElement => (
-                            <Input
-                                key={inputElement.id}
-                                label={inputElement.config.attributes.label}
-                                elementType={inputElement.config.inputtype}
-                                attributes={inputElement.config.attributes}
-                                value={inputElement.config.value}
-                                changed={(event) => this.inputElementChangeHandler(event, inputElement.id)}
-                                touched={inputElement.config.touched}
-                                valid={inputElement.config.valid}
-                                shouldValidate={inputElement.config.validation} />
-                        ))
-                    }
-                    <Button btnType='Success' >Order</Button>
-                </form>
-            </Auxilary>
-        );
-
 
         return (
             < div className='ContactData' >
@@ -224,4 +225,7 @@ export class ContactData extends Component {
     }
 }
 
-export default ContactData
+
+
+
+export default connect()(ContactData);

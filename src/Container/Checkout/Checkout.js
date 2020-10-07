@@ -5,9 +5,10 @@ import { Route } from 'react-router';
 import { CheckoutSummary } from '../../Components/UI/Order/CheckoutSummary/CheckoutSummary'
 import ContactData from './ContactData/ContactData';
 
+
+
+
 class Checkout extends Component {
-
-
 
     checkoutCancelHandler = () => {
         this.props.history.goBack();
@@ -29,7 +30,7 @@ class Checkout extends Component {
                 <Route
                     path={this.props.match.path + '/contact-data'}
                     render={(props) => (
-                        <ContactData ingredients={this.props.ings} price={this.props.price} {...props} />
+                        <ContactData ingredients={this.props.ings} price={this.props.price} />
                     )
                     } />
             </div>

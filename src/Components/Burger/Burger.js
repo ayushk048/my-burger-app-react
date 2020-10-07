@@ -5,7 +5,6 @@ import BurgerIngredient from './BurgerIngredient/BurgerIngredient';
 
 const Burger = (props) => {
 
-    console.log(props.ingredients);
 
     let transformedIngredient;
 
