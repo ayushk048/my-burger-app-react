@@ -6,6 +6,9 @@ import Auxilary from '../../../HOC/Auxilary/Auxilary';
 import Spinner from '../../../Components/UI/Spinner/Spinner';
 import Input from '../../../Components/UI/Input/Input';
 import { connect } from 'react-redux';
+import { postOrder } from '../../../store/actions/ordersAction';
+import { Redirect } from 'react-router';
+
 
 
 export class ContactData extends Component {
@@ -112,48 +115,37 @@ export class ContactData extends Component {
                 touched: false
             }
         },
-        isLoading: false
+        isLoading: false,
+        formIsValid: false
     };
 
 
 
     orderHandler = (event) => {
         event.preventDefault();
-        // console.log(this.props.ingredients);
-        // console.log('Loading Happaning..');
-        // this.setState({ isLoading: true });
-        // const order = {
-        //     customer: {
-        //         name: this.state.orderFrom.name.value,
-        //         email: this.state.orderFrom.email.value,
-        //         address: {
-        //             street: this.state.orderFrom.street.value,
-        //             country: this.state.orderFrom.country.value,
-        //             postalCode: this.state.orderFrom.postalCode.value,
-        //         },
-        //     },
-        //     deliveryMethod: this.state.orderFrom.deliveryMethod.value,
-        //     ingredients: this.props.ingredients,
-        //     price: this.props.price
-        // }
+
+        const order = {
+            customer: {
+                name: this.state.orderFrom.name.value,
+                email: this.state.orderFrom.email.value,
+                address: {
+                    country: this.state.orderFrom.country.value,
+                    postalCode: this.state.orderFrom.postalCode.value,
+                    street: this.state.orderFrom.street.value,
+                },
+            },
+            deliveryMethod: this.state.orderFrom.deliveryMethod.value,
+            ingredients: this.props.ingredients,
+            price: this.props.price
+        }
 
         // http post
-        // Axios.post('/orders', order)
-        // Axios.post('/orders.json', order)
-        //     .then(res => {
-
-        //         this.props.history.push('/');
-        //         console.log('Loading closed...');
-        //         this.setState({ isLoading: false });
-        //     })
-        //     .catch(err => {
-        //         this.setState({ isLoading: false });
-        //         console.log(err);
-        //     })
+        this.props.onOrderBurger(order);
 
     }
 
     inputElementChangeHandler = (event, id) => {
+
         console.log(event.target.value);
         let cloneOrderForm = JSON.parse(JSON.stringify(this.state.orderFrom));
         cloneOrderForm[id].value = event.target.value;
@@ -161,7 +153,12 @@ export class ContactData extends Component {
             cloneOrderForm[id].valid = this.checkValidation(cloneOrderForm[id].value, cloneOrderForm[id].validation);
         }
         cloneOrderForm[id].touched = true;
-        this.setState({ orderFrom: cloneOrderForm });
+        let formIsValid = false;
+        for (let key in cloneOrderForm) {
+            if (key === 'deliveryMethod') continue;
+            formIsValid = cloneOrderForm[key].valid
+        }
+        this.setState({ orderFrom: cloneOrderForm, formIsValid });
     }
 
     checkValidation = (value, rule) => {
@@ -190,10 +187,7 @@ export class ContactData extends Component {
         return isValid;
     }
 
-    disabledBtn = () => {
-        const valid = Object.keys(this.state).forEach(obj => obj.touched === false);
-        console.log(valid);
-    }
+
 
     render() {
         let formElementArr = [];
@@ -226,17 +220,22 @@ export class ContactData extends Component {
                                     shouldValidate={inputElement.config.validation} />
                             ))
                         }
-                        <Button type="submit" btnType='Success' disabled={this.disabledBtn} >Order</Button>
+                        <Button type="submit" btnType='Success' disabled={!this.state.formIsValid} >Order</Button>
                     </form>
 
                 </Auxilary>
             );
         }
 
+        console.log(this.props.purchased);
         return (
             < div className='ContactData' >
+                {/* {this.props.ingredients} */}
                 {this.props.ingredients.salad || this.props.ingredients.cheese || this.props.ingredients.meat || this.props.ingredients.becon ? contactData : this.props.history.push('/')}
+                {this.props.purchased && <Redirect to="/" />}
+
             </div >
+
         )
     }
 }
@@ -244,10 +243,17 @@ export class ContactData extends Component {
 
 const stateToprops = state => {
     return {
-        ingredients: state.ingredients,
-        price: state.totalPrice
+        ingredients: state.burger.ingredients,
+        price: state.burger.totalPrice,
+        purchased: state.order.purchased
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onOrderBurger: (order) => dispatch(postOrder(order)),
     }
 }
 
 
-export default connect(stateToprops)(ContactData);
+export default connect(stateToprops, mapDispatchToProps)(ContactData);

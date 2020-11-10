@@ -1,57 +1,50 @@
-import Axios from '../../Axios-Order'
-import React, { useState, useEffect } from 'react'
+
+import React, { useEffect } from 'react'
 import Order from '../../Components/UI/Order/Order'
-import Spinner from '../../Components/UI/Spinner/Spinner';
 import Modal from '../../Components/UI/Modal/Modal';
+import { useDispatch, useSelector } from 'react-redux';
+import { getOrders } from '../../store/actions/ordersAction'
+import Spinner from '../../Components/UI/Spinner/Spinner';
 
 
 
 const Orders = (props) => {
-    const [orders, setOrders] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(false);
 
 
+    const orders = useSelector(state => state.order.orders);
+    const loading = useSelector(state => state.order.loading);
+    const error = useSelector(state => state.order.error);
+
+
+    const dispatch = useDispatch();
 
     useEffect(() => {
+        // Axios.get('/orders')
 
-        setIsLoading({
-            ...isLoading,
-            isLoading: true
-        });
-        Axios.get('/orders.json').then(res => {
-            let fetchOrder = [];
-            for (const key in res.data) {
-                fetchOrder.push({ id: key, ...res.data[key] });
-            }
-            setOrders(fetchOrder);
-            setIsLoading(false);
-            setError(false);
-        })
-            .catch(err => {
-                setIsLoading(false);
-                setError(err);
-            })
+        dispatch(getOrders());
+        console.log(orders);
+
+        //eslint-disable-next-line
     }, []);
 
     const closeModalHandler = () => {
-        setError({
-            ...error,
-            error: null
-        });
 
         props.history.replace('/');
     }
 
+    console.log(loading);
     return (
         <div>
             {
-                error ? (
+                error && (
                     <Modal
                         show={error}
                         modalClosed={closeModalHandler}
                     > {error.message}</Modal>
-                ) : isLoading ? <Spinner /> : orders.length === 0 ?
+                )
+            }
+            {loading ? <Spinner /> :
+                orders.length === 0 ?
                     <p style={{ fontWeight: 'bold', textAlign: 'center' }}>NO ORDER FOUND</p>
                     : (
                         orders.map(order => (
@@ -59,6 +52,7 @@ const Orders = (props) => {
                         ))
                     )
             }
+
         </div>
     )
 

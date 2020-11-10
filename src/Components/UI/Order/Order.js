@@ -23,7 +23,8 @@ const Order = (props) => {
                     padding: '5px 10px 10px',
                     marginRight: '5px',
                     borderRadius: '5px',
-                    textAlign: "center"
+                    textAlign: "center",
+                    margin: '3px'
                 }}>
                 {ingredient.name} ({ingredient.value})
             </span>

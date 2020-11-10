@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react'
 import BuiltControls from '../../Components/Burger/BuiltControls/BuiltControls';
 import Burger from '../../Components/Burger/Burger';
@@ -9,18 +9,28 @@ import { withErrorHandler } from '../../HOC/withErrorHandler/withErrorHandler';
 import axios from '../../Axios-Order'
 import Spinner from '../../Components/UI/Spinner/Spinner';
 import { useSelector, useDispatch } from 'react-redux'
-import * as actionType from '../../store/action'
+import { addIngredient, initIngredients, removeIngredient } from '../../store/actions/burgerBuilderAction';
 
 
 
 const BurgerBuilder = (props) => {
-    const [purchasing, setPurchasing] = useState(false);
-    const [isLoading] = useState(false);
 
-    const ingredients = useSelector(state => state.ingredients);
-    const ingredientsPrice = useSelector(state => state.INGREDIENT_PRICES);
-    const totalPrice = useSelector(state => state.totalPrice);
+    const [purchasing, setPurchasing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const ingredients = useSelector(state => state.burger.ingredients);
+    const ingredientsPrice = useSelector(state => state.burger.INGREDIENT_PRICES);
+    const totalPrice = useSelector(state => state.burger.totalPrice);
+    const error = useSelector(state => state.burger.error)
+
     const dispatcher = useDispatch();
+
+    useEffect(() => {
+
+        dispatcher(initIngredients());
+        // eslint-disable-next-line
+    }, [])
+
 
     const disabledInfo = {
         ...ingredients
@@ -58,20 +68,22 @@ const BurgerBuilder = (props) => {
     }
     return (
         <Auxilary>
-            {ingredients ? (
+            {error && alert('error something went wrong')}
+            {ingredients && !error ? (
                 <Auxilary>
                     <Burger ingredients={ingredients} />
                     <BuiltControls
                         priceForEach={ingredientsPrice}
-                        ingredientAdded={(ing) => dispatcher({ type: actionType.ADD_INGREDIENT, ingredientName: ing })}
-                        ingredientRemoved={(ing) => dispatcher({ type: actionType.REMOVE_INGREDIENT, ingredientName: ing })}
+                        ingredientAdded={(ing) => dispatcher(addIngredient(ing))}
+                        ingredientRemoved={(ing) => dispatcher(removeIngredient(ing))}
                         disabled={disabledInfo}
                         price={totalPrice}
                         purchasable={updatePurchaseState(ingredients)}
                         ordered={purchaseHandler} />
                 </Auxilary>) : <Spinner />}
             <Modal show={purchasing} modalClosed={purchaseCancelHandler}>
-                {/* {orderSummary} */}
+
+
 
                 {isLoading ?
                     <Spinner /> : ingredients ? (
@@ -95,11 +107,7 @@ const BurgerBuilder = (props) => {
 //     }
 
 //     componentDidMount() {
-//         // axios.get('https://react-my-burger-b2c5d.firebaseio.com/ingredients.json')
-//         //     .then(res => {
-//         //         this.setState({ ingredients: res.data })
-//         //     }).catch(err => console.log(err.message))
-//         //     ;
+//         
 
 //     }
 
